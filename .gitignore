@@ -32,3 +32,5 @@ configs/wallets_config/*.json
 cron_dump/*.dump
 cron_dump/currency.dump
 cron_dump/currency_exclude.dump
+
+.tern-port

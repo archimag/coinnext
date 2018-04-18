@@ -9,6 +9,11 @@ var helmet = require('helmet');
 var simpleCdn = require('express-simple-cdn');
 var CoreAPIClient = require('./lib/core_api_client');
 var environment = process.env.NODE_ENV || 'development';
+var dotenv = require('dotenv');
+var flash = require('express-flash');
+var session = require('express-session');
+
+dotenv.load();
 
 // Configure globals
 GLOBAL.appConfig = require("./configs/config");
@@ -39,12 +44,15 @@ app.configure(function () {
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(cookieParser);
-  app.use(express.session({
+  app.use(session({
     key: GLOBAL.appConfig().session.session_key,
     store: sessionStore,
     proxy: true,
-    cookie: GLOBAL.appConfig().session.cookie
+    //cookie: GLOBAL.appConfig().session.cookie
   }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(flash());
   if (environment !== "test") {
     app.use(express.csrf());
     app.use(function(req, res, next) {
@@ -60,11 +68,13 @@ app.configure(function () {
   }
   app.use(express.static(__dirname + '/public'));
   app.use(require('connect-assets')(connectAssetsOptions));
-  app.use(passport.initialize());
-  app.use(passport.session());
+
+app.use(function(req, res, next) {
+    next();
+});
+    
   app.use(app.router);
   app.use(function(err, req, res, next) {
-    console.error(err);
     res.render("errors/500");
   });
 });
